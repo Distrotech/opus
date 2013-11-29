@@ -724,6 +724,7 @@ opus_int32 test_parse(void)
    /*code 0*/
    for(i=0;i<64;i++)
    {
+      packet[0]=i<<2;
       UNDEFINE_FOR_PARSE
       ret=opus_packet_parse(packet,4,&toc,frames,size,&payload_offset);
       cfgs++;
@@ -1351,6 +1352,16 @@ opus_int32 test_enc_api(void)
      "    OPUS_SET_LSB_DEPTH ........................... OK.\n",
      "    OPUS_GET_LSB_DEPTH ........................... OK.\n")
 
+   err=opus_encoder_ctl(enc,OPUS_GET_PREDICTION_DISABLED(&i));
+   if(i!=0)test_failed();
+   cfgs++;
+   err=opus_encoder_ctl(enc,OPUS_GET_PREDICTION_DISABLED((opus_int32 *)NULL));
+   if(err!=OPUS_BAD_ARG)test_failed();
+   cfgs++;
+   CHECK_SETGET(OPUS_SET_PREDICTION_DISABLED(i),OPUS_GET_PREDICTION_DISABLED(&i),-1,2,1,0,
+     "    OPUS_SET_PREDICTION_DISABLED ................. OK.\n",
+     "    OPUS_GET_PREDICTION_DISABLED ................. OK.\n")
+
    err=opus_encoder_ctl(enc,OPUS_GET_EXPERT_FRAME_DURATION((opus_int32 *)NULL));
    if(err!=OPUS_BAD_ARG)test_failed();
    cfgs++;
@@ -1373,7 +1384,7 @@ opus_int32 test_enc_api(void)
    if(err!=OPUS_OK)test_failed();
    cfgs++;
    CHECK_SETGET(OPUS_SET_EXPERT_FRAME_DURATION(i),OPUS_GET_EXPERT_FRAME_DURATION(&i),0,-1,
-     OPUS_FRAMESIZE_VARIABLE,OPUS_FRAMESIZE_ARG,
+         OPUS_FRAMESIZE_60_MS,OPUS_FRAMESIZE_ARG,
      "    OPUS_SET_EXPERT_FRAME_DURATION ............... OK.\n",
      "    OPUS_GET_EXPERT_FRAME_DURATION ............... OK.\n")
 
@@ -1435,9 +1446,9 @@ int test_repacketizer_api(void)
 
    packet=malloc(max_out);
    if(packet==NULL)test_failed();
-   po=malloc(max_out);
-   if(po==NULL)test_failed();
    memset(packet,0,max_out);
+   po=malloc(max_out+256);
+   if(po==NULL)test_failed();
 
    i=opus_repacketizer_get_size();
    if(i<=0)test_failed();
@@ -1539,6 +1550,22 @@ int test_repacketizer_api(void)
                   cfgs++;
                   if(opus_repacketizer_out(rp,po,len)!=len)test_failed();
                   cfgs++;
+                  if(opus_packet_unpad(po,len)!=len)test_failed();
+                  cfgs++;
+                  if(opus_packet_pad(po,len,len+1)!=OPUS_OK)test_failed();
+                  cfgs++;
+                  if(opus_packet_pad(po,len+1,len+256)!=OPUS_OK)test_failed();
+                  cfgs++;
+                  if(opus_packet_unpad(po,len+256)!=len)test_failed();
+                  cfgs++;
+                  if(opus_multistream_packet_unpad(po,len,1)!=len)test_failed();
+                  cfgs++;
+                  if(opus_multistream_packet_pad(po,len,len+1,1)!=OPUS_OK)test_failed();
+                  cfgs++;
+                  if(opus_multistream_packet_pad(po,len+1,len+256,1)!=OPUS_OK)test_failed();
+                  cfgs++;
+                  if(opus_multistream_packet_unpad(po,len+256,1)!=len)test_failed();
+                  cfgs++;
                   if(opus_repacketizer_out(rp,po,len-1)!=OPUS_BUFFER_TOO_SMALL)test_failed();
                   cfgs++;
                   if(len>1)
@@ -1638,6 +1665,22 @@ int test_repacketizer_api(void)
          cfgs++;
          if(opus_repacketizer_out(rp,po,len)!=len)test_failed();
          cfgs++;
+         if(opus_packet_unpad(po,len)!=len)test_failed();
+         cfgs++;
+         if(opus_packet_pad(po,len,len+1)!=OPUS_OK)test_failed();
+         cfgs++;
+         if(opus_packet_pad(po,len+1,len+256)!=OPUS_OK)test_failed();
+         cfgs++;
+         if(opus_packet_unpad(po,len+256)!=len)test_failed();
+         cfgs++;
+         if(opus_multistream_packet_unpad(po,len,1)!=len)test_failed();
+         cfgs++;
+         if(opus_multistream_packet_pad(po,len,len+1,1)!=OPUS_OK)test_failed();
+         cfgs++;
+         if(opus_multistream_packet_pad(po,len+1,len+256,1)!=OPUS_OK)test_failed();
+         cfgs++;
+         if(opus_multistream_packet_unpad(po,len+256,1)!=len)test_failed();
+         cfgs++;
          if(opus_repacketizer_out(rp,po,len-1)!=OPUS_BUFFER_TOO_SMALL)test_failed();
          cfgs++;
          if(len>1)
@@ -1650,9 +1693,43 @@ int test_repacketizer_api(void)
       }
    }
 
+   po[0]='O';
+   po[1]='p';
+   if(opus_packet_pad(po,4,4)!=OPUS_OK)test_failed();
+   cfgs++;
+   if(opus_multistream_packet_pad(po,4,4,1)!=OPUS_OK)test_failed();
+   cfgs++;
+   if(opus_packet_pad(po,4,5)!=OPUS_BAD_ARG)test_failed();
+   cfgs++;
+   if(opus_multistream_packet_pad(po,4,5,1)!=OPUS_BAD_ARG)test_failed();
+   cfgs++;
+   if(opus_packet_pad(po,0,5)!=OPUS_BAD_ARG)test_failed();
+   cfgs++;
+   if(opus_multistream_packet_pad(po,0,5,1)!=OPUS_BAD_ARG)test_failed();
+   cfgs++;
+   if(opus_packet_unpad(po,0)!=OPUS_BAD_ARG)test_failed();
+   cfgs++;
+   if(opus_multistream_packet_unpad(po,0,1)!=OPUS_BAD_ARG)test_failed();
+   cfgs++;
+   if(opus_packet_unpad(po,4)!=OPUS_INVALID_PACKET)test_failed();
+   cfgs++;
+   if(opus_multistream_packet_unpad(po,4,1)!=OPUS_INVALID_PACKET)test_failed();
+   cfgs++;
+   po[0]=0;
+   po[1]=0;
+   po[2]=0;
+   if(opus_packet_pad(po,5,4)!=OPUS_BAD_ARG)test_failed();
+   cfgs++;
+   if(opus_multistream_packet_pad(po,5,4,1)!=OPUS_BAD_ARG)test_failed();
+   cfgs++;
+
    fprintf(stdout,"    opus_repacketizer_cat ........................ OK.\n");
    fprintf(stdout,"    opus_repacketizer_out ........................ OK.\n");
    fprintf(stdout,"    opus_repacketizer_out_range .................. OK.\n");
+   fprintf(stdout,"    opus_packet_pad .............................. OK.\n");
+   fprintf(stdout,"    opus_packet_unpad ............................ OK.\n");
+   fprintf(stdout,"    opus_multistream_packet_pad .................. OK.\n");
+   fprintf(stdout,"    opus_multistream_packet_unpad ................ OK.\n");
 
    opus_repacketizer_destroy(rp);
    cfgs++;
