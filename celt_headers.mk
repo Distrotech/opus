@@ -35,4 +35,10 @@ celt/arm/fixed_armv4.h \
 celt/arm/fixed_armv5e.h \
 celt/arm/kiss_fft_armv4.h \
 celt/arm/kiss_fft_armv5e.h \
+celt/mips/fixed_generic_mipsr1.h \
+celt/mips/kiss_fft_mipsr1.h \
+celt/mips/mdct_mipsr1.h \
+celt/mips/pitch_mipsr1.h \
+celt/mips/vq_mipsr1.h \
+celt/mips/celt_mipsr1.h \
 celt/x86/pitch_sse.h

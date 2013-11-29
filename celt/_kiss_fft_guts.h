@@ -102,6 +102,10 @@
 #include "arm/kiss_fft_armv5e.h"
 #endif
 
+#if defined(MIPSr1_ASM)
+#include "mips/kiss_fft_mipsr1.h"
+#endif
+
 #else  /* not FIXED_POINT*/
 
 #   define S_MUL(a,b) ( (a)*(b) )

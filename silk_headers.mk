@@ -23,6 +23,11 @@ silk/arm/macros_armv4.h \
 silk/arm/macros_armv5e.h \
 silk/arm/SigProc_FIX_armv4.h \
 silk/arm/SigProc_FIX_armv5e.h \
+silk/mips/macros_mipsr1.h \
+silk/mips/NSQ_del_dec_mipsr1.h \
+silk/mips/sigproc_fix_mipsr1.h \
+silk/fixed/mips/prefilter_FIX_mipsr1.h \
+silk/fixed/mips/warped_autocorrelation_FIX_mipsr1.h \
 silk/fixed/main_FIX.h \
 silk/fixed/structs_FIX.h \
 silk/float/main_FLP.h \

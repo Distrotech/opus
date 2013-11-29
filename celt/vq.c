@@ -38,6 +38,11 @@
 #include "bands.h"
 #include "rate.h"
 
+#if defined(MIPSr1_ASM)
+#include "mips/vq_mipsr1.h"
+#endif
+
+#ifndef OVERRIDE_vq_exp_rotation1
 static void exp_rotation1(celt_norm *X, int len, int stride, opus_val16 c, opus_val16 s)
 {
    int i;
@@ -61,6 +66,7 @@ static void exp_rotation1(celt_norm *X, int len, int stride, opus_val16 c, opus_
       *Xptr--      = EXTRACT16(SHR32(MULT16_16(c,x1) - MULT16_16(s,x2), 15));
    }
 }
+#endif /* OVERRIDE_vq_exp_rotation1 */
 
 static void exp_rotation(celt_norm *X, int len, int dir, int stride, int K, int spread)
 {
@@ -319,6 +325,7 @@ unsigned alg_quant(celt_norm *X, int N, int K, int spread, int B, ec_enc *enc
 
 /** Decode pulse vector and combine the result with the pitch vector to produce
     the final normalised signal in the current band. */
+#ifndef OVERRIDE_alg_unquant
 unsigned alg_unquant(celt_norm *X, int N, int K, int spread, int B,
       ec_dec *dec, opus_val16 gain)
 {
@@ -343,7 +350,9 @@ unsigned alg_unquant(celt_norm *X, int N, int K, int spread, int B,
    RESTORE_STACK;
    return collapse_mask;
 }
+#endif /* OVERRIDE_alg_unquant */
 
+#ifndef OVERRIDE_renormalise_vector
 void renormalise_vector(celt_norm *X, int N, opus_val16 gain)
 {
    int i;
@@ -373,6 +382,7 @@ void renormalise_vector(celt_norm *X, int N, opus_val16 gain)
    }
    /*return celt_sqrt(E);*/
 }
+#endif /* OVERRIDE_renormalise_vector */
 
 int stereo_itheta(celt_norm *X, celt_norm *Y, int stereo, int N)
 {

@@ -40,6 +40,10 @@
 #include "x86/pitch_sse.h"
 #endif
 
+#if defined(MIPSr1_ASM)
+#include "mips/pitch_mipsr1.h"
+#endif
+
 void pitch_downsample(celt_sig * OPUS_RESTRICT x[], opus_val16 * OPUS_RESTRICT x_lp,
       int len, int C);
 

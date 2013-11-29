@@ -41,6 +41,11 @@
 #include "mathops.h"
 #include "stack_alloc.h"
 
+#if defined(MIPSr1_ASM)
+#include "mips/kiss_fft_mipsr1.h"
+#endif
+
+
 /* The guts header contains all the multiplication and addition macros that are defined for
    complex numbers.  It also delares the kf_ internal functions.
 */
@@ -305,6 +310,7 @@ static void ki_bfly3(
    }
 }
 
+#ifndef OVERRIDE_kf_bfly5
 static void kf_bfly5(
                      kiss_fft_cpx * Fout,
                      const size_t fstride,
@@ -373,7 +379,9 @@ static void kf_bfly5(
       }
    }
 }
+#endif /* OVERRIDE_kf_bfly5 */
 
+#ifndef OVERRIDE_ki_bfly5
 static void ki_bfly5(
                      kiss_fft_cpx * Fout,
                      const size_t fstride,
@@ -441,8 +449,9 @@ static void ki_bfly5(
       }
    }
 }
+#endif /* OVERRIDE_ki_bfly5 */
 
-#endif
+#endif /* RADIX_TWO_ONLY */
 
 
 #ifdef CUSTOM_MODES
